@@ -73,8 +73,7 @@ public class FrequentWords {
 				return kMer.compareTo(o.kMer); //NAtural ordering on name if occurences are the same;
 			}
 		}
-		
-		public String reverse() {
+		public static String reverse(String kMer){
 			StringBuilder reverse = new StringBuilder();
 			for (char c:kMer.toCharArray()) {
 				char complement;
@@ -97,6 +96,9 @@ public class FrequentWords {
 					reverse.append(complement);
 				}
 			return reverse.reverse().toString();
+		}
+		public String reverse() {
+			return reverse(kMer);
 		}
 	}
 	
