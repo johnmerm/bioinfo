@@ -16,12 +16,13 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
 
 public class FrequentWords {
 
-	static class KMer{
+	static class KMer implements Comparable<KMer>{
 		private String kMer;
 		private List<Integer> foundAt = new ArrayList<Integer>();
 		public KMer(String kMer) {
@@ -65,10 +66,41 @@ public class FrequentWords {
 			return kMer;
 		}
 		
+		public int compareTo(KMer o) {
+			if (occurences() - o.occurences() !=0) {
+				return occurences() - o.occurences(); //revese sorting (larger first 
+			}else {
+				return kMer.compareTo(o.kMer); //NAtural ordering on name if occurences are the same;
+			}
+		}
 		
+		public String reverse() {
+			StringBuilder reverse = new StringBuilder();
+			for (char c:kMer.toCharArray()) {
+				char complement;
+				switch (c) {
+				case 'A':
+						complement = 'T';
+						break;
+					case 'T':
+						complement = 'A';
+						break;
+					case 'G':
+						complement = 'C';
+						break;
+					case 'C':
+						complement = 'G';
+						break;
+					default:
+						throw new IllegalArgumentException("Illegal acid "+c);
+					}
+					reverse.append(complement);
+				}
+			return reverse.reverse().toString();
+		}
 	}
 	
-	public static Set<KMer> findKmers(String input,int k){
+	public static SortedSet<KMer> findKmers(String input,int k){
 		Map<String,KMer> map = new HashMap<String, FrequentWords.KMer>();
 		
 		for (int i=0;i<input.length()-k;i++) {
@@ -82,16 +114,7 @@ public class FrequentWords {
 			}
 		}
 		
-		SortedSet<KMer> kmerSet = new TreeSet<KMer>(new Comparator<KMer>() {
-			public int compare(KMer o1, KMer o2) {
-				if (o1.occurences() - o2.occurences() !=0) {
-					return o2.occurences() - o1.occurences(); //revese sorting (larger first 
-				}else {
-					return o1.kMer.compareTo(o2.kMer); //NAtural ordering on name if occurences are the same;
-				}
-				
-			}
-		});
+		SortedSet<KMer> kmerSet = new TreeSet<KMer>();
 		for (KMer kmer:map.values()) {
 			kmerSet.add(kmer);
 		}
