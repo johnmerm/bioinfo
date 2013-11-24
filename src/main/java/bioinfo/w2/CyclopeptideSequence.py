@@ -34,45 +34,67 @@ def spectrum(peptide):
     spct = [0]+ [sum([im_table[a] for a in ppd]) for ppd in subs]+[sum([im_table[a] for a in peptide])]
     return sorted(spct);
 
-def expand(peptide):
-    return [peptide+a for a in im_table.keys()]
+integer_dict = {im_table[x]:x for x in im_table}
+i_set = set(integer_dict.values())
 
-def CycloSequence(input): #can't get it to work
-    in_set = {int(a) for a in input.split(" ")}
-    ret_set =set()
-    candidates = [""];
-    while True:
-        next_phase=[]
+def expand(peptideList):
+    ret=list()
+    for peptide in peptideList:
+        ret.extend([peptide+a for a in i_set])
+    return ret
+
+def CycloSequence(in_set): #can't get it to work
+    ret_set =[]
+    candidates = [""]
+    while len(candidates)>0:
+        
+        candidates = expand(candidates)
         for c in candidates:
-            spc = set(spectrum(c))
-            if (spc == input):
-                ret_set.add("-".join([str(im_table[c1]) for c1 in c]))
-            elif spc.issubset(in_set):
-                next_phase.append(c)
             
-            
-        if len(next_phase) == 0:
-            break;
-        candidates=[]
-        for n in next_phase:
-            candidates.extend(expand(n))
-             
+            spect = set(spectrum(c))
+            if (spect == in_set):
+                ret_set.append(spect)
+                candidates.remove(c)
+            elif not spect.issubset(in_set):
+                candidates.remove(c)
+     
+        
+        
     return ret_set    
                 
     
 def convolute(input):
     s_input=sorted([int(a) for a in input.split(" ")])
-    for i in range(1,len(s_input)):
+    for i in range(0,len(s_input)):
         ai = s_input[i]
-        yield ai
-        for j in range(1,i):
-            aj = s_input[i-j]
+        for j in range(0,i):
+            aj = s_input[j]
             a = ai-aj
             yield a
     
 
-print(list(convolute("465 473 998 257 0 385 664 707 147 929 87 450 748 938 998 768 234 722 851 113 700 957 265 284 250 137 317 801 128 820 321 612 956 434 534 621 651 129 421 337 216 699 347 101 464 601 87 563 738 635 386 972 620 851 948 200 156 571 551 522 828 984 514 378 363 484 855 869 835 234 1085 764 230 885"))  )
-            
-             
-            
+def filterAndRank(input,m):
+    cv = [a for a in convolute(input) if a>=57 and a<=200]
+    cvm = {}
+    for a in cv:
+        if a in cvm:
+            cvm[a]+=1
+        else:
+            cvm[a]=1
+    
+    sorted_cvm = sorted(cvm.iteritems(),key=lambda x:x[1],reverse=True)
+    cvm_final = []
+    mc=0
+    while mc<m:
+        cvm_final.append(sorted_cvm[mc][0])
+        mc +=1
+    
+    while sorted_cvm[mc][1] == sorted_cvm[m-1][1]:
+        cvm_final.append(sorted_cvm[mc][0])
+        mc+=1
+    return [a[0] for a in sorted_cvm]
+     
+        
+in_str="0 113 128 186 241 299 314 427"
+print(CycloSequence({int(a) for a in in_str.split(" ")}))            
 
