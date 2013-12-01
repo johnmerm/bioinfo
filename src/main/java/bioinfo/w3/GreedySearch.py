@@ -5,6 +5,8 @@ Created on Dec 1, 2013
 '''
 from MotifEnumeration import *
 from MedianString import *
+from random import random;
+from random import randint
 
 def index(k):
     if (k=='A'):return 0
@@ -74,8 +76,82 @@ def formProfile(kmer_list):
         profile[i] = [float(p)/float(sp) for p in profile[i]]
     return profile
 
-data = [ d.strip() for d in list(open('/home/giannis/Downloads/dataset_39_5(3).txt'))[1:] ]
-gms = GreedyMotifSearch(data,12,25)
+def gibbsDistr(dna,k,profile):
+    dist = {kmer:probability(kmer, profile) for kmer in kmersInDna(dna, k)}
+    sd = sum(dist.values())
+    dist = {kmer:float(dist[kmer])/sd for kmer in dist.keys()}
+    return dist
 
-print "\n".join(gms)
+def gibbsRandom(dna,k,profile):
+    dist = gibbsDistr(dna, k, profile)
+    dl = []
+    for (d,v) in dist.items():
+        dl += int(1/v)*[d]
+    r = dl[randint(0,len(dl)-1)]
+    return r
+
+def plainRandom(dna,k):
+    kmers=  list(kmersInDna(dna, k));
+    return kmers[randint(0,len(kmers)-1)]
+    
+def randomSearch(dna_list,k,t):
+    bestMotifs = []
+    for i in range(t):
+        bestMotifs.append(plainRandom(dna_list[i],k))
+    
+    best_score = score(bestMotifs, k)
+    motifs = list(bestMotifs)
+    while True:
+        profile = formProfile(motifs)
+        motifs = [profileMostProbableKMer(dna, k, profile) for dna in dna_list]
+        sc = score(motifs,k)
+        if sc<best_score:
+            bestMotifs = motifs
+            best_score = sc
+        else:
+            return (bestMotifs,best_score)
+
+
+def gibbsSearch(dna_list,k,t,N):
+    bestMotifs = []
+    for i in range(0,t-1):
+        bestMotifs.append(plainRandom(dna_list[i],k))
+    best_score = score(bestMotifs, k)
+    motifs = list(bestMotifs)
+    for count in range(N):
+        i = randint(0,len(motifs)-1)
+        profileMatrix = [motifs[a] for a in range(t-1) if a !=i ]
+        profile = formProfile(profileMatrix)
+        motifs[i] = gibbsRandom(dna_list[i],k,profile)
+        sc = score(motifs, k)
+        if sc <best_score:
+            best_score = sc
+            bestMotifs = motifs
+    return bestMotifs,best_score        
+        
+    
+            
+        
+        
+
+def randomSearchFull(dna_list,k,t):
+    bs = 65535
+    best = []
+    for count in range(1000):
+        (m,s) = randomSearch(dna_list, k, t)
+        if s<bs:
+            bs = s
+            best = m
+    return best
+ 
+ 
+k=15
+
+N=2000             
+data = [ d.strip() for d in list(open('/home/giannis/Downloads/dataset_43_4(1).txt'))[1:] ]
+
+t=len(data)
+r,s = gibbsSearch(data, k, t, N)
+
+print("\n".join(r))
 
