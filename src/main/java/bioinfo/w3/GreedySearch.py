@@ -7,6 +7,7 @@ from MotifEnumeration import *
 from MedianString import *
 from random import random;
 from random import randint
+from bisect import bisect_left
 
 def index(k):
     if (k=='A'):return 0
@@ -47,7 +48,7 @@ def GreedyMotifSearch(dna_list,k,t):
             motifs.append(profileMostProbableKMer(dna_list[i], k, profile))
         c_score = score(motifs,k)
         if c_score<best_score:
-            print "found motifs "+ (" ".join(motifs))+" with score "+str(c_score)
+            print ("found motifs "+ (" ".join(motifs))+" with score "+str(c_score))
             bestMotifs = motifs
             best_score = c_score
     return bestMotifs
@@ -60,37 +61,47 @@ def score(motifs,k):
         col_score.append(len(column)-col_count[0][1])
     return sum(col_score)
  
-def formProfile(kmer_list):
+def formProfile(kmer_list,laplace=True):
     profile=[]
     for i in range(len(kmer_list[0])):
         profile.append([0,0,0,0])
         for t in range(len(kmer_list)):
             ks = kmer_list[t][i];
             profile[i][index(ks)]+= 1
-        #Laplace succession
-        mp = min(profile[i])
-        if (mp==0):
-            profile[i] = [p+1 for p in profile[i]]
-        
-        sp = sum(profile[i]) 
+        if (laplace):
+            mp = min(profile[i])
+            if (mp==0):
+                profile[i] = [p+1 for p in profile[i]]
+            sp = sum(profile[i]) 
         profile[i] = [float(p)/float(sp) for p in profile[i]]
     return profile
 
-def gibbsDistr(dna,k,profile):
-    dist = {kmer:probability(kmer, profile) for kmer in kmersInDna(dna, k)}
-    sd = sum(dist.values())
-    dist = {kmer:float(dist[kmer])/sd for kmer in dist.keys()}
-    return dist
-
 def gibbsRandom(dna,k,profile):
-    dist = gibbsDistr(dna, k, profile)
-    dl = []
-    for (d,v) in dist.items():
-        dl += int(1/v)*[d]
-    r = dl[randint(0,len(dl)-1)]
-    return r
+    daKmers = []
+    probs = []
+    probInteg = []
+    s = 0.0
+    
+    for i in range(len(dna)-k+1):
+        daKmer = dna[i:i+k]
+        daKmers.append(daKmer)
+        prob = probability(daKmer, profile)
+        probs.append(prob)
+        probInteg.append(s)
+        s += prob
+    lo = 0
+    hi = len(probInteg)
+    
+    r = random()*s
+    i = bisect_left(probInteg, r,lo,hi)
+    if i == hi:
+        return daKmers[hi-1]
+    else:
+        return daKmers[i]
+    
 
 def plainRandom(dna,k):
+    
     kmers=  list(kmersInDna(dna, k));
     return kmers[randint(0,len(kmers)-1)]
     
@@ -114,10 +125,11 @@ def randomSearch(dna_list,k,t):
 
 def gibbsSearch(dna_list,k,t,N):
     bestMotifs = []
-    for i in range(0,t-1):
+    for i in range(0,t):
         bestMotifs.append(plainRandom(dna_list[i],k))
     best_score = score(bestMotifs, k)
     motifs = list(bestMotifs)
+   
     for count in range(N):
         i = randint(0,len(motifs)-1)
         profileMatrix = [motifs[a] for a in range(t-1) if a !=i ]
@@ -132,7 +144,15 @@ def gibbsSearch(dna_list,k,t,N):
     
             
         
-        
+def gibbsSearchFull(dna_list,k,t,N):
+    best_score=65535
+    bestMotif = []
+    for i in range(20):
+        (r,s) = gibbsSearch(dna_list, k, t, N)
+        if s<best_score:
+            best_score = s
+            bestMotif = r
+    return bestMotif,best_score 
 
 def randomSearchFull(dna_list,k,t):
     bs = 65535
@@ -143,15 +163,3 @@ def randomSearchFull(dna_list,k,t):
             bs = s
             best = m
     return best
- 
- 
-k=15
-
-N=2000             
-data = [ d.strip() for d in list(open('/home/giannis/Downloads/dataset_43_4(1).txt'))[1:] ]
-
-t=len(data)
-r,s = gibbsSearch(data, k, t, N)
-
-print("\n".join(r))
-
