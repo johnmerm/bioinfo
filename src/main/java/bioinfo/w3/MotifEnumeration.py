@@ -7,6 +7,13 @@ Created on Dec 1, 2013
 
 dna_string=['A','C','G','T'];
 
+
+def allKmersInDna(dna,k):
+    kid = []
+    for i in range(len(dna)-k+1):
+        kid.append(dna[i:i+k]);
+    return kid
+
 def kmersInDna(dna,k):
     kid = set()
     for i in range(len(dna)-k+1):
