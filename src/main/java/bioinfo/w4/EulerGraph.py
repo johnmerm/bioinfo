@@ -15,18 +15,26 @@ def parseGraph(lines):
                 rev_graph[c] = [n]
     return (graph,rev_graph)
 
-def cycle(graph,rev_graph,n=None):
+def cycle(graph,rev_graph,start=None,end=None):
     bigcycle=[]
+    if start != None:
+        n = start
+    else:
+        n = None
+        
     while sum([len(a) for a in graph.values()]) >0 :
         
         if len(bigcycle) >0:
             n = None
             for i in graph.keys():
-                if len(graph[i]) >0 and len(rev_graph[i]) >0 and i in bigcycle:
+                a =len(graph[i]) if i in graph else 0
+                b = len(rev_graph[i]) if i in rev_graph else 0  
+                if  a>0 and b>0 and i in bigcycle:
                     n = i
                     break
             if n == None:
-                raise NameError('Graph exhausted')
+                print('Graph exhausted')
+                break
         else:
             if n == None:
                 n=next(iter(graph.keys()))
@@ -54,35 +62,52 @@ def cycle(graph,rev_graph,n=None):
             
     return bigcycle
 
-def pathToCycle(graph,rev_graph):
-    oddNodes = []
+def preparePath(graph,rev_graph):
+    oddNodes = {}
     allNodes = set(graph.keys()).union(rev_graph.keys())
     
     for n in allNodes:
         out = graph[n] if n in graph else []
         inc = rev_graph[n] if n in rev_graph else []
-        s = len(out)+len(inc)
-        if s % 2 == 1:
-            oddNodes.append(n)
+        s = len(out)-len(inc)
+        if s != 0:
+            oddNodes[n] = s
     
     if len(oddNodes) == 0:
         return None
-    elif len(oddNodes) % 2 ==0:
-        noOutgoinConn = {n for n in allNodes if not n in graph}
-        noIncomingConn =  {n for n in allNodes if not n in rev_graph}
-        unbalanced = {n for n in oddNodes if n in graph and n in rev_graph}
-        disconnected = {n for n in allNodes if not n in graph and not n in rev_graph}
-        
-        nic = iter(noIncomingConn)
-        for n in noOutgoinConn:
-            c = next(nic)
-            graph
-        return oddNodes
-            
+    else: 
+        oddNodes = sorted(oddNodes.items(),key=lambda x:x[1])
+        return oddNodes    
+def connect(a,b,graph,rev_graph):
+    if a in graph:
+        graph[a].append(b)
     else:
-        raise NameError('Graph has '+str(len(oddNodes))+' unbalanced nodes')
-            
-        
+        graph[a] = [b]
+    
+    if b in rev_graph:
+        rev_graph[b].append(a)
+    else:
+        rev_graph[b] = [a]
+
+def paths(graph,rev_graph):
+    paths = []
+    oddNodes = preparePath(graph, rev_graph)
     
     
+    if oddNodes == None:
+        return cycle(graph, rev_graph,None)
+    else:
+        g = dict(graph)
+        r = dict(rev_graph)
+        while oddNodes != None:
+            o = oddNodes[0]
+            i = oddNodes[-1]
+            if len(oddNodes) ==2:
+                break
+            else:
+                connect(o[0],i[0],g,r)
+                oddNodes = preparePath(g, r)
+        path = cycle(g, r, i[0],o[0])
+        print("->".join(path))
+        return path
     

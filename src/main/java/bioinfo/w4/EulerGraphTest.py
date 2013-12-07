@@ -4,7 +4,7 @@ Created on Dec 5, 2013
 @author: grmsjac6
 '''
 import unittest
-from bioinfo.w4.EulerGraph import parseGraph,cycle,pathToCycle
+from bioinfo.w4.EulerGraph import parseGraph,cycle,paths
 
 
 class Test(unittest.TestCase):
@@ -51,30 +51,13 @@ class Test(unittest.TestCase):
                  "7 -> 8",
                  "8 -> 9",
                  "9 -> 6"]
-        file = open('C:/Users/grmsjac6.GLOBAL-AD/Downloads/eulerian_path.txt')
+        file = open('/home/giannis/Downloads/dataset_57_5(1).txt')
         data = list(file)
         file.close()
-        lines = data[2:-2]
+        lines = data#[2:-2]
         
         graph,rev_graph = parseGraph(lines)
-        adden = pathToCycle(graph,rev_graph)
-        
-        allNodes = set(graph.keys()).union(set(rev_graph.keys()))
-        
-        
-        
-        
-        
-        
-        first = adden[0]
-        euCycle = cycle(graph,rev_graph)
-        
-        sa = sum([len(a) for a in graph.values()])
-        sb = sum([len(a) for a in rev_graph.values()])
-        assert sa == sb == 0 
-        
-        
-
+        pp = sorted(paths(graph, rev_graph),key= lambda x:len(x),reverse=True)
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testEulerCycle']
     unittest.main()
