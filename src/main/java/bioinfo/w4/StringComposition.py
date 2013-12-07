@@ -56,8 +56,8 @@ def deBru(kmers):
         overlaps.append( (kmer[:k-1],kmer[1:]) )
     for (s,p) in overlaps:
         if s in debru:
-            debru[s].add(p)
+            debru[s].append(p)
         else:
-            debru[s] = {p}
+            debru[s] = [p]
     
-    return sorted(debru.items(),key=lambda x:x[0])
+    return debru

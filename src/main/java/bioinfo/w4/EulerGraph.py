@@ -1,3 +1,4 @@
+from random import randint
 def parseGraph(lines):
     graph = {}
     
@@ -15,7 +16,7 @@ def parseGraph(lines):
                 rev_graph[c] = [n]
     return (graph,rev_graph)
 
-def cycle(graph,rev_graph,start=None,end=None):
+def cycle(graph,rev_graph,start=None):
     bigcycle=[]
     if start != None:
         n = start
@@ -26,13 +27,18 @@ def cycle(graph,rev_graph,start=None,end=None):
         
         if len(bigcycle) >0:
             n = None
+            cands = []
             for i in graph.keys():
                 a =len(graph[i]) if i in graph else 0
                 b = len(rev_graph[i]) if i in rev_graph else 0  
                 if  a>0 and b>0 and i in bigcycle:
-                    n = i
-                    break
-            if n == None:
+                    cands.append(i)
+                    if len(cands)==1:
+                        break
+            
+            if len(cands)>0:
+                n = cands[randint(0,len(cands)-1)]    
+            else:
                 print('Graph exhausted')
                 break
         else:
