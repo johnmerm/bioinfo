@@ -68,5 +68,3 @@ def validateUniversalString(string,k):
         else:
             return False 
     return True
-
-print validateUniversalString(UniversalString(16), 16)

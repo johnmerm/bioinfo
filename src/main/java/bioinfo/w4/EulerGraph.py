@@ -33,8 +33,8 @@ def cycle(graph,rev_graph,start=None):
                 b = len(rev_graph[i]) if i in rev_graph else 0  
                 if  a>0 and b>0 and i in bigcycle:
                     cands.append(i)
-                    if len(cands)==1:
-                        break
+#                     if len(cands)==1:
+#                         break
             
             if len(cands)>0:
                 n = cands[randint(0,len(cands)-1)]    
@@ -113,7 +113,9 @@ def paths(graph,rev_graph):
             else:
                 connect(o[0],i[0],g,r)
                 oddNodes = preparePath(g, r)
-        path = cycle(g, r, i[0],o[0])
-        print("->".join(path))
+                
+        start = i[0]
+        path = cycle(g, r, start)
+#        print("->".join(path))
         return path
     
