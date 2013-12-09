@@ -61,3 +61,14 @@ def deBru(kmers):
             debru[s] = [p]
     
     return debru
+
+
+def revgraph(graph):
+    rev_graph={}
+    for (n,cc) in graph.items():
+        for c in cc:
+            if c in rev_graph:
+                rev_graph[c].append(n)
+            else:
+                rev_graph[c] = [n]
+    return rev_graph

@@ -5,6 +5,9 @@ Created on Dec 7, 2013
 '''
 from bioinfo.w4.EulerGraph import paths, cycle
 from StringComposition import deBru
+
+
+
 def StringReconstruction(graph,rev_graph):
     p = paths(graph, rev_graph)
     string = p[0]

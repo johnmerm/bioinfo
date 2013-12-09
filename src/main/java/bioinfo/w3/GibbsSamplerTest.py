@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
     def gibbsSearchOut(self):
         k=15
         N=2000   
-        data = [ d.strip() for d in list(open('C:/Users/grmsjac6.GLOBAL-AD/Downloads/dataset_43_4.txt'))[1:] ]
+        data = [ d.strip() for d in list(open('/home/giannis/Downloads/dataset_43_4.txt'))[1:] ]
 
         t=len(data)
         r,s = gibbsSearchFull(data, k, t, N)

@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         
 
     def skiptestGraphWithData(self):
-        file = open('C:/Users/grmsjac6.GLOBAL-AD/Downloads/dataset_57_2(2).txt')
+        file = open('/home/giannis/Downloads/dataset_57_2.txt')
         data = list(file)
         file.close()
         lines = data
