@@ -3,7 +3,7 @@ Created on Dec 7, 2013
 
 @author: giannis
 '''
-from bioinfo.w4.EulerGraph import paths, cycle
+from EulerGraph import paths, cycle
 from StringComposition import deBru
 
 

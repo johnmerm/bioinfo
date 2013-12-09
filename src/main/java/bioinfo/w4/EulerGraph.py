@@ -16,6 +16,10 @@ def parseGraph(lines):
                 rev_graph[c] = [n]
     return (graph,rev_graph)
 
+
+def copyGraph(graph):
+    return {k:list(v) for (k,v) in graph.items()}
+
 def cycle(graph,rev_graph,start=None):
     bigcycle=[]
     if start != None:
