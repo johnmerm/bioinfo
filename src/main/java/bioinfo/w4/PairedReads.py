@@ -42,13 +42,14 @@ def validatePath(path,d):
         
 def pairedReads(lines,d):
     graph,rev_graph = pairedDeBru(lines)
-    c_g = {x:list(v) for (x,v) in graph.items()}
-    c_r = {x:list(v) for (x,v) in rev_graph.items()}
+    c_g = {x:list(graph[x]) for x in graph.keys()}
+    c_r = {x:list(rev_graph[x]) for x in rev_graph.keys()}
+    
     pt = paths(c_g, c_r)
     string = validatePath(pt, d)
     while string == None:
-        c_g = {x:list(v) for (x,v) in graph}
-        c_r = {x:list(v) for (x,v) in rev_graph}
+        c_g = {x:list(graph[x]) for x in graph.keys()}
+        c_r = {x:list(rev_graph[x]) for x in rev_graph.keys()}
         pt = paths(c_g, c_r)
         string = validatePath(pt, d)
     
