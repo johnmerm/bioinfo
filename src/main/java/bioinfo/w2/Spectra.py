@@ -20,5 +20,3 @@ integer_dict = {im_table[x]:x for x in im_table}
 i_set = set(integer_dict.values())
 
 
-
-    
