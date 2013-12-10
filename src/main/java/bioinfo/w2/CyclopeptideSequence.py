@@ -3,17 +3,46 @@ Created on Nov 23, 2013
 
 @author: giannis
 '''
+from Spectra import *
 from timeit import itertools
-from bioinfo.w2.Spectra import i_set
 
-def convolute(input):
+def convolute(input,M):
     s_input=sorted([int(a) for a in input.split(" ")])
-    for i in range(0,len(s_input)):
-        ai = s_input[i]
-        for j in range(0,i):
-            aj = s_input[j]
-            a = ai-aj
-            yield a
+    s_input = [0]+s_input
+    
+    cv = [ [s_input[0]] ]
+    
+    freq = {}
+    
+    for i in range(1,len(s_input)):
+        ccv =[s_input[i]]
+        for j in range(1,i):
+            ccvv = s_input[i] - s_input[j]
+            ccv.append(ccvv)
+            if ccvv >=57 and ccvv<=200:
+                if ccvv in freq:
+                    freq[ccvv]+=1
+                else:
+                    freq[ccvv] = 1
+        cv.append(ccv)
+        
+    freq_s = sorted(freq.items(),key=lambda x:x[1],reverse=True)
+    
+    ret_freq = freq_s[:M]
+    last_val = ret_freq[-1][1]
+    for rf in freq_s[M:]:
+        if rf[1] == last_val:
+            ret_freq.append(rf)
+        else:
+            break
+    
+    ret_set = {s[0] for s in ret_freq}
+        
+    
+     
+    return ret_set,cv,freq_s
+
+    
     
 
 def filterAndRank(input,m):
@@ -37,10 +66,9 @@ def filterAndRank(input,m):
         mc+=1
     return [a[0] for a in sorted_cvm]
 
-def expand(peptideList):
+def expand(peptide,pep_set=i_set):#peptide being a sorted list of integers
     ret=list()
-    for peptide in peptideList:
-        ret.extend([peptide+a for a in i_set])
+    ret.extend([peptide+[a] for a in pep_set])
     return ret
 
 def score(spect,tgt):
@@ -50,9 +78,11 @@ def score(spect,tgt):
             sc+=1
     return sc
 
-def CycloSequence(in_set,N=1): #can't get it to work
+def spec_str(peptide):
+    return "-".join([str(p) for p in peptide])
+def CycloSequence(in_set,N=1,pep_set=i_set): #can't get it to work
     
-    candidates = [""]
+    candidates = [[0]]
     prev_candidates = None
     
     candi_scores = {'':0}
@@ -61,20 +91,20 @@ def CycloSequence(in_set,N=1): #can't get it to work
         prev_candidates = candidates
         for c in list(candidates):
             parent_score = score(set(spectrum(c)), in_set)
-            for cn in expand([c]):
-                scor = score(set(spectrum(cn)), in_set)
+            for cn in expand(c,pep_set):
+                scor = score(spectrum(cn), in_set)
                 if scor >parent_score:
                     candidates.append(cn)
-                    candi_scores[cn] = scor
+                    candi_scores[spec_str(cn)] = scor
             
             #candidates.remove(c)
             
             
-            candidates = sorted(candidates,key=lambda x:candi_scores[x],reverse=True)
+            candidates = sorted(candidates,key=lambda x:candi_scores[spec_str(x)] if spec_str(x) in candi_scores else 0,reverse=True)
             if len(candidates)>N :
                 tie_can = candidates[:N]
                 for ct in candidates[N:]:
-                    if candi_scores[ct] == candi_scores[candidates[N-1]]:
+                    if spec_str(ct) in  candi_scores and candi_scores[spec_str(ct)] == candi_scores[spec_str(candidates[N-1])]:
                         tie_can.append(ct)
                     else:
                         break
@@ -91,17 +121,12 @@ def CycloSequence(in_set,N=1): #can't get it to work
 #                 candidates.remove(c)
     
     
-    candi_set = sorted(candidates,key=lambda x:candi_scores[x],reverse=True)
+    candi_set = sorted(candidates,key=lambda x:candi_scores[spec_str(x)],reverse=True)
     
                 
         
-    ret_set = set()
-    for c in candi_set:
-        r = "-".join([str(im_table[ci]) for ci in c])
-        ret_set.add(r)
     
-    
-    return ret_set
+    return [spec_str(p[1:]) for p in candi_set]
 
 def subpeptides(peptide):
     l = len(peptide)
@@ -110,15 +135,14 @@ def subpeptides(peptide):
         for length in range(1, l):
             yield looped[start:start+length]
 
-
-im_table_file = open('integer_mass_table.txt')
-im_table = {s.split(' ')[0]:int(s.split(' ')[1])  for s in im_table_file }
-integer_dict = {im_table[x]:x for x in im_table}
-i_set = set(integer_dict.values())
-
-def spectrum(peptide):
-    if peptide == "":
-        return [0]
-    subs = subpeptides(peptide)
-    spct = [0]+ [sum([im_table[a] for a in ppd]) for ppd in subs]+[sum([im_table[a] for a in peptide])]
-    return sorted(spct);
+def spectrum(peptide):#peptide being a list of integers
+#     if peptide == "":
+#         return [0]
+#     subs = subpeptides(peptide)
+#     spct = [0]+ [sum([im_table[a] for a in ppd]) for ppd in subs]+[sum([im_table[a] for a in peptide])]
+#     return sorted(spct);
+    spec=set()
+    for i in range(0,len(peptide)):
+        combis = itertools.combinations(peptide,i)
+        spec = spec.union({sum(c) for c in combis})
+    return sorted(spec)
