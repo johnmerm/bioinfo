@@ -50,23 +50,22 @@ def outputLCS(backtrack,v,ii,jj):
     return ''.join(reversed(out))
 
 
-def dagOneNode(node,graph,s,backtrack):
-    if not node in graph:
-        #node == sink
-        return 
-    connections  = graph[node]
-    cs = {c:((s[c] if c in s else 0) + v) for (c,v)  in connections}
-    cd = max(cs.items(),key=lambda x:x[1])
-    backtrack[cd[0]] = node
-    s[node] = cd[1]
-    dagOneNode()
      
 
 def dag(source,sink,graph):
     s = {}
     s[source] = 0
     backtrack={}
-    dagOneNode(source,graph,s,backtrack)
+    
+    node = source
+    while node != sink:
+        connections  = graph[node]
+        cs = {c:((s[c] if c in s else 0) + v) for (c,v)  in connections}
+        cd = max(cs.items(),key=lambda x:x[1])
+        backtrack[cd[0]] = node
+        s[node] = cd[1]
+        node = cd[0]
+   
     
     return s,backtrack
     
@@ -83,4 +82,4 @@ def assignment():
     out.write(lcs(v, w))
     out.close()
 
-assignment()
+#assignment()
