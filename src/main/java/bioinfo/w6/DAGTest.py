@@ -29,7 +29,9 @@ class Test(unittest.TestCase):
             else:
                 graph[key]=[vv]
             
-        dag(source, sink, graph)
+        w,path = dag(source, sink, graph)
+        assert w == 9
+        assert "->".join(path) == "0->2->3->4"
 
 
 if __name__ == "__main__":

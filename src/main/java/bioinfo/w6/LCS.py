@@ -52,22 +52,75 @@ def outputLCS(backtrack,v,ii,jj):
 
      
 
-def dag(source,sink,graph):
-    s = {}
-    s[source] = 0
-    backtrack={}
-    
-    node = source
-    while node != sink:
+def calculateDags(node,graph,s,l,backtrack):
+    if node in graph:
+        sb = s[node]
+        lb = l[node]
+        
         connections  = graph[node]
-        cs = {c:((s[c] if c in s else 0) + v) for (c,v)  in connections}
-        cd = max(cs.items(),key=lambda x:x[1])
-        backtrack[cd[0]] = node
-        s[node] = cd[1]
-        node = cd[0]
-   
+        for (c,v) in connections:
+            sa = sb + v
+            if not c in s:
+                s[c] = sa
+                backtrack[c] = node
+            elif sa>s[c]:
+                s[c] = sa
+                backtrack[c] = node
+                
+            l[c] = lb+1
+            calculateDags(c, graph, s,l,backtrack)
+
+def dag(source,sink,graph):
+    s = {source:0}
+    l={source:0}
+    backtrack = {}
+    calculateDags(source, graph, s,l,backtrack)
     
-    return s,backtrack
+    rev_graph = {}
+    for n,cc in graph.items():
+        cns = [g for (g,v) in cc]
+        for c in cns:
+            if c in rev_graph:
+                rev_graph[c].append(n)
+            else:
+                rev_graph[c] = [n]
+    
+    node = sink
+    path = []
+    w = 0
+    while node != source:
+        path.append(node)
+        node_next = backtrack[node]
+#         cns = rev_graph[node]
+#         node_next = max(cns,key=lambda x:l[x] if x in l else 0)
+        wv = filter(lambda x:x[0] == node, graph[node_next])
+        w += wv[0][1]
+        node = node_next
+    path.append(node)
+    return w,reversed(path)
+
+def assignmentDAG():
+    f = open('/home/giannis/Downloads/dataset_74_7.txt')
+   
+    source = next(f).strip()
+    sink = next(f).strip()
+    lines = [l.strip() for l in f]
+    
+    graph = {}
+    for line in lines:
+        toks = line.split("->")
+        key = toks[0]
+        value = toks[1].split(":")
+        vv = (value[0], int(value[1])) 
+        if key in graph:
+            graph[key].append(vv)
+        else:
+            graph[key] = [vv]
+         
+    w, path = dag(source, sink, graph)
+    print(w)
+    print("->".join(path)) 
+    
     
     
     
@@ -82,4 +135,4 @@ def assignment():
     out.write(lcs(v, w))
     out.close()
 
-#assignment()
+assignmentDAG()
