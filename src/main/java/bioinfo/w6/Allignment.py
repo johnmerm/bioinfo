@@ -4,9 +4,9 @@ Created on Dec 16, 2013
 @author: grmsjac6
 '''
 
-from LCS import lcs,dag
-from django.conf.locale import el
-from _threading_local import local
+from LCS import lcs,dag,calculateDags
+
+
 
 def loadMatrix(f):
     matrix={}
@@ -145,7 +145,7 @@ def movement(p_this,p_next):
 def allignDAG(v,w,local=False):
     mat = loadMatrix('BLOSUM62.txt')
     graph = createDAG(v, w, mat, 5)
-    
+    print(len(graph))
     source = '0,0'
     sink = str(len(v))+','+str(len(w))
     
@@ -153,6 +153,8 @@ def allignDAG(v,w,local=False):
         for node in graph:
             graph[source].append((node,0))
             graph[node].append((sink,0))
+        
+        print(len(graph))
     
     s, path = dag(source,sink , graph)
             
@@ -188,7 +190,28 @@ def allignDAG(v,w,local=False):
             
             
                 
-        
+def localDag(v,w,sigma,mat):
+    graph={}
+    rev_graph = {}
+     
+    for i in range(len(v)):
+        for j in range(len(w)):
+            node = str(i)+','+str(j)
+            
+            graph[node]=[]
+            if i<len(v) and j <len(w):
+                node_diag = str(i+1)+','+str(j+1)
+                graph[node].append((node_diag,mat[(v[i],w[j])]))
+            
+            if i<len(v):
+                node_down = str(i+1)+','+str(j)
+                graph[node].append((node_down,-sigma))
+            
+            if j<len(w): 
+                node_right = str(i)+','+str(j+1)
+                graph[node].append((node_right,-sigma))
+    return graph
+    
     
     
        
