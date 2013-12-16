@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
         v = "AACCTTGG"
         w = "ACACTGTGA"
         
-        ret = lcs(v, w)
+        s,b,ret = lcs(v, w)
         out = "AACTGG"
         
         assert  len(ret) == len(out)

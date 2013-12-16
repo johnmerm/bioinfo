@@ -3,30 +3,40 @@ Created on Dec 13, 2013
 
 @author: grmsjac6
 '''
-def lcs(v,w):
+def lcs(v,w,sigma=0,match = lambda x,y:1 if x == y else 0):
     n = len(v)
     m = len(w)
     
     s=[[0 for i in range(m+1)]for j in range(n+1)]
     backtrack=[['' for i in range(m+1)]for j in range(n+1)]
     
+    
+    if sigma != 0:
+        for i in range(1,n):
+            s[i][0] = s[i-1][0]-sigma
+            backtrack[i-1][0] = 'd'
+        for j in range(1,m):
+            s[0][j] = s[0][j-1]-sigma
+            backtrack[0][j-1] = 'r'
+        backtrack[0][0]='g'
+        
+    
     for i in range(1,n+1):
         for j in range(1,m+1):
-            d = s[i-1][j]
-            r = s[i][j-1]
-            g = s[i-1][j-1]+1 if v[i-1] == w[j-1] else 0
+            d = s[i-1][j] -sigma
+            r = s[i][j-1] -sigma
+            g = s[i-1][j-1]+match(v[i-1],w[j-1])
             
             s[i][j] = max(d,r,g)
-            
             
             if s[i][j] == d:
                 backtrack[i][j] = 'd'
             elif s[i][j] == r:
-                backtrack[i][j] ='r'
+                backtrack[i][j] = 'r'
             elif s[i][j] == g:
                 backtrack[i][j] = 'g'
             
-    return outputLCS(backtrack, v, i, j)
+    return s[i][j],backtrack,outputLCS(backtrack, v, i, j)
 
 def outputLCS(backtrack,v,ii,jj):
     i = ii
@@ -41,7 +51,6 @@ def outputLCS(backtrack,v,ii,jj):
         elif b =='r':
             j = j-1
         else:
-            
             i = i-1
             j=j-1
             out.append(v[i])
@@ -93,11 +102,11 @@ def dag(source,sink,graph):
         node_next = backtrack[node]
 #         cns = rev_graph[node]
 #         node_next = max(cns,key=lambda x:l[x] if x in l else 0)
-        wv = filter(lambda x:x[0] == node, graph[node_next])
+        wv = list(filter(lambda x:x[0] == node, graph[node_next]))
         w += wv[0][1]
         node = node_next
     path.append(node)
-    return w,reversed(path)
+    return w,list(reversed(path))
 
 def assignmentDAG():
     f = open('/home/giannis/Downloads/dataset_74_7.txt')
@@ -134,5 +143,3 @@ def assignment():
     
     out.write(lcs(v, w))
     out.close()
-
-assignmentDAG()
