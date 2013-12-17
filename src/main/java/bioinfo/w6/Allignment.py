@@ -152,7 +152,7 @@ def allignDAG(v,w,local=False):
             
             
                 
-def localAllign(v,w,sigma=5,mat=loadMatrix('PAM250_1.txt')):
+def localAlign(v,w,sigma=5,mat=loadMatrix('PAM250_1.txt')):
     m = len(w)
     n = len(v)
     s=[[0 for j in range(m+1)] for i in range(n+1)]
@@ -223,7 +223,7 @@ def assignmentLocal():
     v=  next(f).strip()
     w = next(f).strip()
     
-    s,o,u = localAllign(v, w)
+    s,o,u = localAlign(v, w)
     print(s)
     print(o)
     print(u)

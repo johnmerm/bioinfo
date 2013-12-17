@@ -5,17 +5,17 @@ Created on Dec 16, 2013
 '''
 import unittest
 
-from Allignment import allignDAG
-from bioinfo.w6.Allignment import localAllign
+
+from Allignment import localAlign
 
 class Test(unittest.TestCase):
 
 
-    def testLocalAllignment(self):
+    def testLocalAlignment(self):
         v = "MEANLY"
         w = "PENALTY"
         
-        s,vv,ww = localAllign(v, w) 
+        s,vv,ww = localAlign(v, w) 
         
         assert s == 15
         assert vv == "EANL-Y"
