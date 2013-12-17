@@ -6,6 +6,7 @@ Created on Dec 16, 2013
 import unittest
 
 from Allignment import allignDAG
+from bioinfo.w6.Allignment import localAllign
 
 class Test(unittest.TestCase):
 
@@ -14,7 +15,7 @@ class Test(unittest.TestCase):
         v = "MEANLY"
         w = "PENALTY"
         
-        s,vv,ww = allignDAG(v, w, True) 
+        s,vv,ww = localAllign(v, w) 
         
         assert s == 15
         assert vv == "EANL-Y"

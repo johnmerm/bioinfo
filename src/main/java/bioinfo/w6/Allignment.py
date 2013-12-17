@@ -71,44 +71,6 @@ def assignmentGlobal():
     
 
 
-def localAllign(v,w,sigma=5):
-    m = loadMatrix('PAM250_1.txt')
-    s,backtrack,r =  lcs(v, w, 0, lambda x,y:m[(x,y)])
-    
-    i = len(v)
-    j = len(w)
-    
-    vv = []
-    ww = []
-    while i>0 or j >0:
-        b = backtrack[i][j]
-        print(b)
-        if b == 'd':
-            i = i-1
-            vv.append(v[i])
-            ww.append("-")
-            
-            
-           
-            
-        elif b =='r':
-            j = j-1
-            ww.append(w[j])
-            vv.append("-")
-            
-            
-            
-        else:
-            i = i-1
-            j=j-1
-            vv.append(v[i])
-            ww.append(w[j])
-            
-            
-            
-    return s,''.join(reversed(vv)),''.join(reversed(ww))
-    
-
 def createDAG(v,w,mat,sigma=5):
     graph={}
     for i in range(len(v)):
@@ -190,27 +152,87 @@ def allignDAG(v,w,local=False):
             
             
                 
-def localDag(v,w,sigma,mat):
-    graph={}
-    rev_graph = {}
-     
-    for i in range(len(v)):
-        for j in range(len(w)):
-            node = str(i)+','+str(j)
+def localAllign(v,w,sigma=5,mat=loadMatrix('PAM250_1.txt')):
+    m = len(w)
+    n = len(v)
+    s=[[0 for j in range(m+1)] for i in range(n+1)]
+    backtrack=[['s' for j in range(m)] for i in range(n)]
+    
+    for i in range(1,n+1):
+        for j in range(1,m+1):
+            mi  = mat[(v[i-1],w[j-1])]
+            sr = s[i][j-1]-sigma
+            sd = s[i-1][j]-sigma
+            sg = s[i-1][j-1]+mi
             
-            graph[node]=[]
-            if i<len(v) and j <len(w):
-                node_diag = str(i+1)+','+str(j+1)
-                graph[node].append((node_diag,mat[(v[i],w[j])]))
+            sc = max(sr,sd,sg,0)
+            s[i][j] = sc
+            if sc == sg:
+                backtrack[i-1][j-1] = 'g'
+            elif sc == 0:
+                backtrack[i-1][j-1] = 's'
+            elif sc == sd:
+                backtrack[i-1][j-1] = 'd'
+            elif sc == sr:
+                backtrack[i-1][j-1] = 'r'
+    
+    max_s=0
+    max_i=0
+    max_j=0
+    
+    for i in range(n+1):
+        for j in range(m+1):
+            if s[i][j]>max_s:
+                max_s = s[i][j]
+                max_i=i 
+                max_j=j
+    
+    
+    vv = []
+    ww = []
+    i=max_i-1
+    j=max_j-1
+    
+    while i>0 or j >0:
+        b = backtrack[i][j]
+        print(b)
+        if b == 'd':
+            vv.append(v[i])
+            ww.append("-")
+            i = i-1
+        elif b =='r':
+            ww.append(w[j])
+            vv.append("-")
+            j = j-1
+        elif b == 'g':
+            vv.append(v[i])
+            ww.append(w[j])
+
+            i = i-1
+            j=j-1
+        elif b=='s':
+            break
             
-            if i<len(v):
-                node_down = str(i+1)+','+str(j)
-                graph[node].append((node_down,-sigma))
             
-            if j<len(w): 
-                node_right = str(i)+','+str(j+1)
-                graph[node].append((node_right,-sigma))
-    return graph
+            
+    return max_s,''.join(reversed(vv)),''.join(reversed(ww))
+                
+                
+def assignmentLocal():
+    f = open('dataset_76_9.txt')
+    v=  next(f).strip()
+    w = next(f).strip()
+    
+    s,o,u = localAllign(v, w)
+    print(s)
+    print(o)
+    print(u)
+
+
+assignmentLocal()             
+    
+        
+    
     
     
     
