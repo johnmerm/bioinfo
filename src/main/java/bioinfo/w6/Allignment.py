@@ -4,7 +4,7 @@ Created on Dec 16, 2013
 @author: grmsjac6
 '''
 
-from LCS import lcs,dag,calculateDags
+from LCS import lcs,dag
 
 
 
@@ -21,9 +21,11 @@ def loadMatrix(f):
             matrix[(pivot,colname)] = int(toks[i])
     return matrix
 
+blosum62 = loadMatrix('../w6/BLOSUM62.txt')
+
 def globalAlign(v,w,sigma=5):
-    m = loadMatrix('BLOSUM62.txt')
-    s,backtrack,r =  lcs(v, w, 5, lambda x,y:m[(x,y)])
+    
+    s,backtrack,r =  lcs(v, w, 5, lambda x,y:blosum62[(x,y)])
     
     i = len(v)
     j = len(w)
@@ -152,7 +154,7 @@ def allignDAG(v,w,local=False):
             
             
                 
-def localAlign(v,w,sigma=5,mat=loadMatrix('PAM250_1.txt')):
+def localAlign(v,w,sigma=5,mat=loadMatrix('../w6/PAM250_1.txt')):
     m = len(w)
     n = len(v)
     s=[[0 for j in range(m+1)] for i in range(n+1)]
@@ -229,7 +231,7 @@ def assignmentLocal():
     print(u)
 
 
-assignmentLocal()             
+#assignmentLocal()             
     
         
     
