@@ -70,8 +70,54 @@ def breakDistanceFile(genomeStrings):
        
     
     
+def complement(s):
+    if s == 'A':return 'T'
+    elif s=='T':return 'A'
+    elif s=='C':return 'G'
+    elif s=='G':return 'C'
+def reverse_complement(kmer):
+    rev = "".join([complement(s) for s in reversed(kmer)])
+    return rev
     
+def all_kmers(v,k):
+    kmers = []
+    kmer_idx = {}
+    for i in range(len(v)-k+1):
+        kmer = v[i:i+k]
+        kmers.append(kmer)
+        if kmer in kmer_idx:
+            kmer_idx[kmer].append(i)
+        else:
+            kmer_idx[kmer] = [i]
             
+    return kmers,kmer_idx
+
+def sharedKmers(k,v,w):
+    vk,vk_idx = all_kmers(v, k)
+    wk,wk_idx = all_kmers(w, k)
+    pos=[]
     
-                
-                
+    for kmer,i_pos in vk_idx.items():
+        j_pos = wk_idx[kmer] if kmer in wk_idx else []
+        jr_pos = wk_idx[reverse_complement(kmer)] if reverse_complement(kmer) in wk_idx else []
+        
+        for i in i_pos:
+            for j in j_pos:
+                pos.append((i,j))
+            for j in jr_pos:
+                pos.append((i,j))
+    
+    return pos
+
+    
+def assignment(): 
+    f = open('dataset_90_2.txt')
+    k=int(next(f))
+    v=next(f).strip()
+    w=next(f).strip()
+    
+    t= sharedKmers(k, v, w)
+    print("\n".join([ "("+str(ti[0])+", "+str(ti[1])+")" for ti in t]))
+
+        
+            
