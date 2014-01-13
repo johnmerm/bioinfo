@@ -6,22 +6,15 @@ Created on Jan 9, 2014
 from cProfile import label
 
 class Node(object):
-    def __init__(self,id,label):
-        self.id = id
+    def __init__(self,nid,parent,label):
+        self.nid = nid
+        self.parent = parent
         self.label  = label
         self.children = {}
-    def addChild(self,id,child):
-        childNode = Node(id,child) 
-        self.children[child] = Node(id,child) 
-        return childNode
-    def __str__(self):
-        return "%d:%s %s" %(self.id,self.label,",".join(self.children.values()))
-    
-        
     
 def Trie(patterns):
     idx = 1
-    root = Node(idx,None)
+    root = Node(idx,None,None)
     for pattern in patterns:
         pNode = root
         for p in pattern:
@@ -29,7 +22,9 @@ def Trie(patterns):
                 pNode = pNode.children[p]
             else:
                 idx +=1
-                pNode = pNode.addChild(idx, p)
+                childNode = Node(idx,pNode,p)
+                pNode.children[p] = childNode
+                pNode = childNode
     return root
 
 def printTrie(trie,id=None): 
@@ -38,6 +33,55 @@ def printTrie(trie,id=None):
     
     for c in trie.children.values():
         printTrie(c,trie.id)
+
+def prefixTrieMatching(text,trie):
+    v = trie
+    for p in text:
+        if p in v.children:
+            v = v.children[p]
+            if len(v.children) == 0:
+                return v
+        else:
+            return None
+    return None
+
+def trieMatching(text,patterns):
+    trie = Trie(patterns)
+    m={}
+    for i in range(len(text)):
+        s_text = text[i:]
+        v = prefixTrieMatching(s_text, trie)
+        if v!=None:
+            mm=[]
+            while v.label != None:
+                mm.append(v.label)
+                v = v.parent
+            p = ''.join(reversed(mm))
+            if p in m:
+                m[p].append(i)
+            else:
+                m[p] = [i]
+    return m
+
+def SuffixTrie(text):
+    root = Node(None,None,None)
+    for i in range(len(text)):
+        j = len(text)-i
+        s_text = text[j:]
+        pNode = root
+       
+        for k in range(len(s_text)):
+            p = s_text[k]
+            if p in pNode.children:
+                pNode = pNode.children[p]
+            else:
+                idx = j if k == len(s_text)-1 else None
+                childNode = Node(idx,pNode,p)
+                pNode.children[p] = childNode
+                pNode = childNode
+           
+            
     
+        
                 
     
