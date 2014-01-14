@@ -3,7 +3,7 @@ Created on Jan 9, 2014
 
 @author: grmsjac6
 '''
-from cProfile import label
+
 
 class Node(object):
     def __init__(self,nid,parent,label):
@@ -11,6 +11,22 @@ class Node(object):
         self.parent = parent
         self.label  = label
         self.children = {}
+    def recstr(self):
+        v=self
+        m = []
+        while v.label != None:
+            m.append(v.label)
+            v= v.parent
+        return ''.join(reversed(m))
+    def __str__(self):
+        s=''
+        if self.label != None:
+            s = s+self.label
+        if self.nid !=None:
+            s = s+'('+str(self.nid)+')'
+        return s
+            
+        
     
 def Trie(patterns):
     idx = 1
@@ -100,6 +116,8 @@ def compressSuffixTrie(root):
             chi = list(n.children.values())[0]
             chich = chi.children
             
+            n.nid = chi.nid
+            
             del n.parent.children[n.label]
             n.label = n.label+chi.label
             n.parent.children[n.label] = n
@@ -110,22 +128,17 @@ def compressSuffixTrie(root):
             all_nodes.remove(chi)
     
     print("Nodes after:"+str(len(all_nodes)))    
-    return root,all_nodes    
+    return root,all_nodes
 
 def longestRepeat(text):#not working
-    suffixTrie,all_nodes = SuffixTrie(text)
+    suffixTrie,allNodes = compressSuffixTrie(SuffixTrie(text))
+    leafs = [l for l in allNodes if len(l.children) == 0 ]
+    branches = {l.parent for l in leafs}
+    pass
     
-    occ = {}
-    for n in all_nodes:
-        for k in n.children.keys():
-            if k in occ:
-                occ[k] += 1
-            else:
-                occ[k] = 1
+               
     
-    occ = [o for o in occ if occ[o]>1]
-    o_max = sorted(occ,key=lambda x:len(x),reverse=True)
-    return o_max
+    
                 
         
                     
