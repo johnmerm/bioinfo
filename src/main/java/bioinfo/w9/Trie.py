@@ -65,6 +65,7 @@ def trieMatching(text,patterns):
 
 def SuffixTrie(text):
     root = Node(None,None,None)
+    #build trie
     for i in range(len(text)):
         j = len(text)-i
         s_text = text[j:]
@@ -79,6 +80,59 @@ def SuffixTrie(text):
                 childNode = Node(idx,pNode,p)
                 pNode.children[p] = childNode
                 pNode = childNode
+    return root
+    
+def compressSuffixTrie(root):
+    toprocess = [root]
+    all_nodes = []
+    
+    while len(toprocess) >0:
+        for tp in toprocess:
+            all_nodes.append(tp)
+            children = tp.children.values()
+            toprocess.remove(tp)
+            toprocess += children
+    print("Nodes before:"+str(len(all_nodes)))
+    #compress
+    for n in all_nodes:
+        ch = n.children
+        if len(ch) == 1:
+            chi = list(n.children.values())[0]
+            chich = chi.children
+            
+            del n.parent.children[n.label]
+            n.label = n.label+chi.label
+            n.parent.children[n.label] = n
+            
+            n.children = chich
+            for chichi in chich.values():
+                chichi.parent = n
+            all_nodes.remove(chi)
+    
+    print("Nodes after:"+str(len(all_nodes)))    
+    return root,all_nodes    
+
+def longestRepeat(text):#not working
+    suffixTrie,all_nodes = SuffixTrie(text)
+    
+    occ = {}
+    for n in all_nodes:
+        for k in n.children.keys():
+            if k in occ:
+                occ[k] += 1
+            else:
+                occ[k] = 1
+    
+    occ = [o for o in occ if occ[o]>1]
+    o_max = sorted(occ,key=lambda x:len(x),reverse=True)
+    return o_max
+                
+        
+                    
+        
+        
+    
+    
            
             
     
