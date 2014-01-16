@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
@@ -13,6 +14,8 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
@@ -194,11 +197,22 @@ public class SuffixArray {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		String text = "CCAAGCTGCTAGAGG$CATGCTGGGCTGGCT#";
-		SuffixArray array = new SuffixArray();
+		InputStream f = SuffixArray.class.getResourceAsStream("dataset_95_6.txt");
+		
+		String[] texts = IOUtils.toString(f).split("\n");
+		
+		final String text1=texts[0];
+		final String text2=texts[1];
+		
+		//final String text1="CCAAGCTGCTAGAGG";
+		//final String text2="CATGCTGGGCTGGCT";
+		
+		String text = text1+"$"+text2+"#";
+		
+		final SuffixArray array = new SuffixArray();
 		array.calculateSuffixArray(text);
 		array.calculateLCP();
-		
+/*		
 		for (int i=0;i<text.length();i++) {
 			int sarry = array.suffixArray.get(i);
 			int lcp = array.lcp.get(i);
@@ -207,15 +221,62 @@ public class SuffixArray {
 			for (int j=0;j<lcp;j++) {
 				treetext.setCharAt(j, '.');
 			}
-			System.out.println(sarry+"\t"+lcp+"\t"+treetext);
+			System.out.println(sarry+"\t"+lcp+"\t"+stext);
+		}
+*/		
+
+		List<int[]> ranges = new ArrayList<int[]>();
+		int range_start = 0;
+		int range_end = 0;
+		int lcp_old = array.lcp.get(0);
+		for (int i=1;i<array.lcp.size();i++){
+			int lcp = array.lcp.get(i);
+			if (lcp == lcp_old){
+				range_end++;
+			}else{
+				ranges.add(new int[]{lcp_old,range_start,range_end});
+				range_start=i;
+				range_end = i;
+				lcp_old = lcp;
+			}
 		}
 		
+//		System.out.println("Ranges");
+//		for (int[] range:ranges){
+//			System.out.println(range[0]+" "+range[1]+" "+range[2]);
+//		}
 		
-		Trie trie = array.toTrie();
+		Collection<int[]> filteredRanges = Collections2.filter(ranges, new Predicate<int[]>() {
+			public boolean apply(int[] arg) {
+				if (arg[0] == 0 || arg[1]==arg[2]){
+					return false;
+				}else{
+					int start = arg[1]-1;
+					int end = arg[2];
+					boolean valid = true;
+					for (int i=start;i<=end;i++){
+						valid &= array.getSuffix(i).contains("$");
+					}
+					return valid;
+				}
+			}
+		});
 		
-		for (Trie t:trie.allNodes()) {
-			System.out.println(t);
+		
+		List<int[]> minranges = Ordering.from(new Comparator<int[]>() {
+			public int compare(int[] o1, int[] o2) {
+				return o1[0]-o2[0];
+			}
+		}).leastOf(filteredRanges, 1);
+		
+		System.out.println("Filtered Ranges");
+		for (int[] range:minranges){
+			System.out.println(range[0]+" "+range[1]+" "+range[2]);
+			for (int i=range[1]-1;i<=range[2];i++){
+				System.out.println(array.getSuffix(i).substring(0,range[0]+1));
+			}
 		}
+		
 		
 	}
 }
