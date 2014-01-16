@@ -20,15 +20,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
 public class Trie {
-	private Integer id;
-	private String label;
-	private Trie parent;
-	private List<Trie> children;
+	Integer id;
+	String label;
+	Trie parent;
+	List<Trie> children;
 	
-	private Trie() {
+	Trie() {
 		// TODO Auto-generated constructor stub
 	}
-	private Trie(Integer id, String label, Trie parent, List<Trie> children) {
+	Trie(Integer id, String label, Trie parent, List<Trie> children) {
 		super();
 		this.id = id;
 		this.label = label;
