@@ -1,12 +1,18 @@
 package bioinfo.w10;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 public class BurrowsWheelerTest {
 
@@ -42,5 +48,47 @@ public class BurrowsWheelerTest {
 		System.out.println(s);
 		
 	}
+	
+	@Test
+	public void testMatching() {
+		String bwText = "TCCTCTATGAGATCCTATTCTATGAAACCTTCA$GACCAAAATTCTCCGGC";
+		
+		final BWMatching bwMatching = new BWMatching(bwText);
+		
+		String patternString = "CCT CAC GAG CAG ATC";
+		String[] patterns = patternString.split(" ");
+		List<Integer> m= Lists.transform(Arrays.asList(patterns), new Function<String, Integer>() {
+			public Integer apply(String input) {
+				int r = bwMatching.matchPattern(input);
+				return r;
+			}
+		});
+		List<Integer> tgt = Arrays.asList(2,1,1,0,1);
+		assertArrayEquals(m.toArray(), tgt.toArray());
+	}
+	
+	@Test
+	public void testMatchingAssignment() throws IOException {
+		InputStream f = BurrowsWheeler.class.getResourceAsStream("dataset_100_8.txt");
+		String lines[] = IOUtils.toString(f).split("\n");
+		
+		
+		String bwText = lines[0].trim();
+		
+		final BWMatching bwMatching = new BWMatching(bwText);
+		
+		String patternString = lines[1].trim();
+		
+		String[] patterns = patternString.split(" ");
+		List<Integer> m= Lists.transform(Arrays.asList(patterns), new Function<String, Integer>() {
+			public Integer apply(String input) {
+				int r = bwMatching.matchPattern(input);
+				return r;
+			}
+		});
+		
+		System.out.println(Joiner.on(" ").join(m));
+	}
+	
 
 }

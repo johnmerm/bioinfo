@@ -15,9 +15,9 @@ import com.google.common.collect.Ordering;
 
 public class BurrowsWheeler {
 
-	private final String text;
-	private final Integer m[];
-	private final String bwt;
+	protected final String text;
+	protected final Integer m[];
+	protected final String bwt;
 	
 	public BurrowsWheeler(final String text){
 		this.text = text;
