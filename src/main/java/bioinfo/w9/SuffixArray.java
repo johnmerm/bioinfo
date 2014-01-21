@@ -21,9 +21,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
 public class SuffixArray {
-	private String text;
-	private List<Integer> suffixArray;
-	private List<Integer> lcp;
+	protected String text;
+	protected List<Integer> suffixArray;
+	protected List<Integer> lcp;
 	
 	public void calculateSuffixArray(final String text) {
 		this.text = text;

@@ -2,6 +2,7 @@ package bioinfo.w10;
 
 import static org.junit.Assert.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -65,11 +66,13 @@ public class BurrowsWheelerTest {
 		});
 		List<Integer> tgt = Arrays.asList(2,1,1,0,1);
 		assertArrayEquals(m.toArray(), tgt.toArray());
+		
+		
 	}
 	
 	@Test
 	public void testMatchingAssignment() throws IOException {
-		InputStream f = BurrowsWheeler.class.getResourceAsStream("dataset_100_8.txt");
+		InputStream f = BurrowsWheeler.class.getResourceAsStream("dataset_101_6.txt");
 		String lines[] = IOUtils.toString(f).split("\n");
 		
 		
@@ -86,8 +89,8 @@ public class BurrowsWheelerTest {
 				return r;
 			}
 		});
-		
-		System.out.println(Joiner.on(" ").join(m));
+		IOUtils.write(Joiner.on(" ").join(m), new FileOutputStream("out.txt"));
+		//System.out.println(Joiner.on(" ").join(m));
 	}
 	
 

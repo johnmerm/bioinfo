@@ -1,9 +1,7 @@
 package bioinfo.w10;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -16,7 +14,6 @@ import com.google.common.collect.Ordering;
 public class BurrowsWheeler {
 
 	protected final String text;
-	protected final Integer m[];
 	protected final String bwt;
 	
 	public BurrowsWheeler(final String text){
@@ -33,7 +30,7 @@ public class BurrowsWheeler {
 			m_set.add(i);
 		}
 		
-		m = m_set.toArray(new Integer[m_set.size()]);
+		Integer[] m = m_set.toArray(new Integer[m_set.size()]);
 		StringBuilder b = new StringBuilder();
 		for (int i=0;i<text.length();i++){
 			int idx = m[i];
@@ -48,10 +45,6 @@ public class BurrowsWheeler {
 
 	public String getText() {
 		return text;
-	}
-
-	public Integer[] getM() {
-		return m;
 	}
 
 	public String getBwt() {
