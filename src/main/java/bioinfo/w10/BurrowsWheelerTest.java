@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -93,5 +94,43 @@ public class BurrowsWheelerTest {
 		//System.out.println(Joiner.on(" ").join(m));
 	}
 	
+	
+	@Test
+	public void testBetterMatching() {
+		String bwText = "TCCTCTATGAGATCCTATTCTATGAAACCTTCA$GACCAAAATTCTCCGGC";
+		
+		final BWMultiMatch bwMatching = new BWMultiMatch(bwText,true,100);
+		
+		String patternString = "CCT CAC GAG CAG ATC";
+		String[] patterns = patternString.split(" ");
+		List<Integer> m= Lists.transform(Arrays.asList(patterns), new Function<String, Integer>() {
+			public Integer apply(String input) {
+				int r = bwMatching.matchPattern(input);
+				return r;
+			}
+		});
+		List<Integer> tgt = Arrays.asList(2,1,1,0,1);
+		assertArrayEquals(m.toArray(), tgt.toArray());
+		
+	}
+	@Test
+	public void testMultiMatch() throws IOException {
+		InputStream f = BurrowsWheeler.class.getResourceAsStream("dataset_103_4.txt");
+		String lines[] = IOUtils.toString(f).split("\n");
+		
+		
+		String text=lines[0].trim();
+		
+		String patterns[] =new String[lines.length-1];
+		
+		for (int i=1;i<lines.length;i++) {
+			patterns[i-1] = lines[i].trim();
+		}
+		List<Integer> pos = BWMultiMatch.matchPositions(text, patterns);
+		IOUtils.write(Joiner.on(" ").join(pos), new FileOutputStream("out.txt"));
+		
+				
+		
+	}
 
 }

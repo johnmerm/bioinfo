@@ -64,7 +64,9 @@ public class SuffixArray {
 		int s_idx = suffixArray.get(idx);
 		return text.substring(s_idx,s_idx+max);
 	}
-	
+	public int getSuffixPosition(int s) {
+		return suffixArray.get(s);
+	}
 	String getSuffix(int s) {
 		return text.substring(suffixArray.get(s));
 	}
