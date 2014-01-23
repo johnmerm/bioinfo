@@ -14,7 +14,10 @@ import org.junit.Test;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 
 public class BurrowsWheelerTest {
 
@@ -122,14 +125,60 @@ public class BurrowsWheelerTest {
 		String text=lines[0].trim();
 		
 		String patterns[] =new String[lines.length-1];
+		List<Integer> tgt = new ArrayList<Integer>();
 		
 		for (int i=1;i<lines.length;i++) {
 			patterns[i-1] = lines[i].trim();
+			
+			String pattern = patterns[i-1];
+			int p=text.indexOf(pattern);
+			while (p>-1) {
+				tgt.add(p);
+				p = text.indexOf(pattern,p+1);
+			}
+			
 		}
+		tgt = Ordering.natural().sortedCopy(tgt);
 		List<Integer> pos = BWMultiMatch.matchPositions(text, patterns);
+		
+		List<Integer> cmp1 = new ArrayList<Integer>(tgt);
+		cmp1.removeAll(pos);
+		
+		List<Integer> cmp2 = new ArrayList<Integer>(pos);
+		cmp2.removeAll(tgt);
+		
+		assertTrue(cmp1.size()==0 && cmp2.size()==0);
+		
 		IOUtils.write(Joiner.on(" ").join(pos), new FileOutputStream("out.txt"));
 		
 				
+		
+	}
+	
+	@Test
+	public void cheatMultiMatch() throws IOException {
+		InputStream f = BurrowsWheeler.class.getResourceAsStream("dataset_103_4.txt");
+		String lines[] = IOUtils.toString(f).split("\n");
+		
+		
+		String text=lines[0].trim();
+		
+		
+		
+		List<Integer> pos = new ArrayList<Integer>();
+		
+		for (int i=1;i<lines.length;i++) {
+			String pattern = lines[i].trim();
+			int p=text.indexOf(pattern);
+			while (p>-1) {
+				pos.add(p);
+				p = text.indexOf(pattern,p+1);
+			}
+		}
+		
+		IOUtils.write(Joiner.on(" ").join(Ordering.natural().sortedCopy(pos)), new FileOutputStream("out.txt"));
+		
+		
 		
 	}
 

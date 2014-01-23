@@ -103,7 +103,6 @@ public class BWMultiMatch {
 				
 			}
 		}
-		ret = Ordering.natural().sortedCopy(ret);
 		return ret;
 		
 	}
