@@ -1,6 +1,5 @@
 package bioinfo.w9;
 
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +12,6 @@ import java.util.TreeSet;
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
@@ -199,15 +197,15 @@ public class SuffixArray {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		InputStream f = SuffixArray.class.getResourceAsStream("dataset_95_6.txt");
+//		InputStream f = SuffixArray.class.getResourceAsStream("dataset_95_6.txt");
+//		
+//		String[] texts = IOUtils.toString(f).split("\n");
+//		
+//		final String text1=texts[0];
+//		final String text2=texts[1];
 		
-		String[] texts = IOUtils.toString(f).split("\n");
-		
-		final String text1=texts[0];
-		final String text2=texts[1];
-		
-		//final String text1="CCAAGCTGCTAGAGG";
-		//final String text2="CATGCTGGGCTGGCT";
+		final String text1="CCAAGCTGCTAGAGG";
+		final String text2="CATGCTGGGCTGGCT";
 		
 		String text = text1+"$"+text2+"#";
 		

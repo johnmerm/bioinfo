@@ -101,14 +101,12 @@ def SuffixTrie(text):
 def compressSuffixTrie(root):
     toprocess = [root]
     all_nodes = []
-    
     while len(toprocess) >0:
         for tp in toprocess:
             all_nodes.append(tp)
             children = tp.children.values()
             toprocess.remove(tp)
             toprocess += children
-    print("Nodes before:"+str(len(all_nodes)))
     #compress
     for n in all_nodes:
         ch = n.children
@@ -127,15 +125,32 @@ def compressSuffixTrie(root):
                 chichi.parent = n
             all_nodes.remove(chi)
     
-    print("Nodes after:"+str(len(all_nodes)))    
     return root,all_nodes
 
+
+def strSoFar(node):
+    s = ""
+    while node and node.label:
+        s = node.label+s
+        node = node.parent
+    return s
 def longestRepeat(text):#not working
-    suffixTrie,allNodes = compressSuffixTrie(SuffixTrie(text))
+    suffixTrie,allNodes = compressSuffixTrie(SuffixTrie(text+"$"))
+    
     leafs = [l for l in allNodes if len(l.children) == 0 ]
     branches = {l.parent for l in leafs}
-    pass
     
+    bs = [strSoFar(b) for b in branches if len(b.children)>1]
+
+    lrp = max(bs,key = lambda n:len(n))
+    return lrp
+
+
+f = open('C:/Users/grmsjac6/Downloads/dataset_296_5.txt')
+toks = list(f)
+text = toks[0].strip()
+lrp = longestRepeat(text)
+print lrp
                
     
     

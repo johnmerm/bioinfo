@@ -1,29 +1,30 @@
 package bioinfo.w9;
 
-import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
 public class Trie {
+	
+	enum Color{
+		RED,BLUE,PURPLE
+	}
+	
 	Integer id;
 	String label;
 	Trie parent;
 	List<Trie> children;
+	
+	Color color;
 	
 	Trie() {
 		// TODO Auto-generated constructor stub
@@ -59,17 +60,35 @@ public class Trie {
 	
 	
 	
-	Trie appendText(String text) { //returns the leaf corresponding to the text
+	Trie appendText(String text,Color color) { //returns the leaf corresponding to the text
 		Trie pos = this;
 		for (char c:text.toCharArray()) {
 			String label = String.valueOf(c);
 			Trie newPos = pos.getChild(label); 
+			
 			if (newPos == null) {
 				newPos = pos.appendChild(label); 
+				newPos.color = color;
+			}else if (newPos.color !=color){
+				newPos.color = Color.PURPLE;
 			}
 			pos = newPos;
 		}
 		return pos;
+	}
+	
+	
+	public void merge(String text,Color color){
+		if (this.color == null){
+			this.color = color;
+		}else if (this.color !=color){
+			this.color = Color.PURPLE;
+		}
+		for (int i = text.length();i>=0;i--) {
+			String suffix = text.substring(i);
+			Trie leaf = appendText(suffix,color);
+			leaf.id = i;
+		}
 	}
 	int depth() {
 		int i=0;
@@ -131,7 +150,7 @@ public class Trie {
 				child.compress();
 			}
 			
-			if (children.size()==1) {
+			if (children.size()==1 && color == children.get(0).color) {
 				Trie child = children.get(0);
 				if (label ==null) {
 					label = child.label;
@@ -149,8 +168,11 @@ public class Trie {
 		}
 		
 	}
-	public Trie lcr() {
+	
+	
+	public Set<Trie> branches(){
 		List<Trie> allLeafs = allLeafs();
+		
 		Set<Trie> branches = new HashSet<Trie>();
 		for (Trie leaf:allLeafs) {
 			Trie l = leaf;
@@ -159,6 +181,11 @@ public class Trie {
 			}
 			branches.add(l.parent);
 		}
+		return branches;
+	}
+	public Trie lcr() {
+		
+		
 		Ordering<Trie> bydepth = Ordering.from(new Comparator<Trie>() {
 			public int compare(Trie o1, Trie o2) {
 				String p1 = o1.path(false);
@@ -171,57 +198,76 @@ public class Trie {
 		});
 		
 		
-		return bydepth.max(branches);
+		return bydepth.max(branches());
 	}
 	@Override
 	public String toString() {
 		String path = path(true);
 		String s = path!=null?path:"";
 		s = s + (label!=null?label:"");
+		s = s+ "["+color+"]";
 		//s = s+ (id!=null?"@"+id:"");
 		return s;
 	}
 
-	public static Trie suffixTrie(String text) {
+	public static Trie suffixTrie(String text,Color color) {
 		//text = text+"$";
 		Trie root = new Trie();
-		for (int i = text.length();i>=0;i--) {
-			String suffix = text.substring(i);
-			Trie leaf = root.appendText(suffix);
-			leaf.id = i;
-		}
+		root.merge(text,color);
 		return root;
 	}
 	
 	
-	
-	public static void main(String[] args) throws Exception{
+	public static String shortestNonSharedSubstring(String text1,String text2){
 		
-		InputStream f = SuffixArray.class.getResourceAsStream("dataset_94_8.txt");
+		
+		
+		Trie suffixTrie =suffixTrie(text1+"#",Color.RED);
+		suffixTrie.merge(text2+"$",Color.BLUE);
+		
+		
+		//suffixTrie.compress();
+		List<String> red = suffixTrie.allNodes().stream().filter(n->n.color == Color.RED && n.children !=null).map(n->{
+					return n.path(false)+n.label;
+
+				}).sorted((o1,o2)->{
+					return o1.length()-o2.length();
+				}).collect(Collectors.toList());
+		
+		
+		
+		return red.get(0);
+	}
+	public static void testLCR() throws Exception{
+		
+		InputStream f = SuffixArray.class.getResourceAsStream("dataset_296_5.txt");
 		final String text = IOUtils.toString(f).trim();
 		
-		//final String text = "ATATCGTTTTATCGTT";
-		//final String text = "ATAAATG";
+		//final String text = "AATTTCCGACTTGCATGACGAGTCAGCGTTCCATCTGATCGAGTCTCCGAAGAACAAATACCCCTACTCAGTTGTGAGCCCCTTTACCGTGAGGACAGGGTCCTTGATGTCGTCTCCTAATTTGCGTTGCGGCTCAACATGTTGTACATAGTGGGGCCAGCCCCAGGGATTTTGTAATTTCTACACTCCATATACGGGACAAGGGTGAGCATTTCCGGGCTTGGATAGGGGCTGCAAGAAAATATCTGGACGTAAGAACTTAATGCCATTCCTACATCCTCGATACCTCGTCTGTCAGAGCAATGAGCTGGTTAGAGGACAGTATTGGTCGGTCATCCTCAGATTGGGGACACATCCGTCTCTATGTGCGTTCCGTTGCCTTGTGCTGACCTTGTCGAACGTACCCCATCTTCGAGCCGCACGCTCGACCAGCTAGGTCCCAGCAGTGGCCTGATAGAAAAATTACCTACGGGCCTCCCAATCGTCCTCCCAGGGTGTCGAACTCTCAAAATTCCCGCATGGTCGTGCTTCCGTACGAATTATGCAAACTCCAGAACCCGGATCTATTCCACGCTCAACGAGTCCTTCACGCTTGGTAGAATTTCATGCTCGTCTTTTGTATCCGTGTAAGTAGGAGGCCGCTGTACGGGTATCCCAGCCTTCGCGCTCTGCTGCAGGGACGTTAACACTCCGAACTTTCCATATACGGGACAAGGGTGAGCATTTCCGGGCTTGGATAGGGGCTGCAAGAAAATATCTGGACGTAAGAAGCTCTGAGGGATCCTCACGGAGTTAGATTTATTTTCCATATACGGGACAAGGGTGAGCATTTCCGGGCTTGGATAGGGGCTGCAAGAAAATATCTGGACGTAAGAAGAGTGATGTTTGGAATGCCAACTTCCATGCACGCCAATTGAGCAATCAGGAGAATCGAGTGCTGTTGACCTAGACCTTGTCAGAAGTATGAATTAACCGCGCGTGTAGGTTTGTCGCTCGACCTGCAAGGGTGCACAATCTGGACTGTCGTCGGCGAACGCTTTCATACGCCTACAAACCGCGTTGCTGGTCGAATCGATCTCACCACCGGCCTTGCAGGATTCTAATTATTCTCTCTCGGTGAGACTGCCGGCGGTCCATGGGTCTGTGTTTCGCTTCAAGCAGTGATATACTGGCGTTTTGTGACACATGGCCACGCACGCCTCTCGTTACTCCCAAT$";
 		
 		long time = System.currentTimeMillis();
-		Trie suffixTrie =suffixTrie(text);
+		Trie suffixTrie =suffixTrie(text,Color.RED);
 		suffixTrie.compress();
 		
 		Trie lcr= suffixTrie.lcr();
 		System.out.println(lcr.path(false)+lcr.label);
 		System.out.println("after "+(System.currentTimeMillis()-time)+" ms");
 		
-		/*suffixTrie.compress();
 		
-		FileWriter fw = new FileWriter("src/main/java/bioinfo/w9/out.txt");
+	}
+	public static void main(String[] args) throws IOException {
+//		String text1 = "CCAAGCTGCTAGAGG";
+//	    String text2 = "CATGCTGGGCTGGCT";
+//	    List<String> data = IOUtils.readLines(Trie.class.getResourceAsStream("dataset_296_7.txt"));
+//	    
+//	    text1 = data.get(0).trim();
+//	    text2 = data.get(1).trim();
+//	    System.out.println(shortestNonSharedSubstring(text1, text2));
 		
 		
-		for (Trie t:suffixTrie.allNodes()) {
-			if (t.label!=null) {
-				fw.write(t.label+"\n");
-			}
-		}
-		
-		fw.close();
-*/	}
+		String t = "GCCAGCTCTTTCAGTATCATGGAGCCCATGG$";
+		Trie trie = suffixTrie(t, Color.RED);
+		trie.compress();
+		System.out.println(trie.branches().size());
+	}
 }

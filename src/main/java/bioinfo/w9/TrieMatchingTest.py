@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         printTrie(trie, id)
         pass
     
-    def a_testTrieMatching(self):
+    def testTrieMatching(self):
         text='AATCGGGTTCAATCGGGGT'
         patterns=['ATCG','GGGT']
         m = trieMatching(text, patterns)
@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
             ma += v
         print(" ".join([str(mv) for mv in sorted(ma)]))
     
-    def testAssignment(self):
+    def a_testAssignment(self):
         f = open('dataset_93_6.txt')
         toks = list(f)
         text = toks[0].strip()
