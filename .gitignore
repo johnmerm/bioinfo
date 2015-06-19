@@ -4,3 +4,5 @@
 /.project
 /.pydevproject
 /out.txt
+/**/dataset_*.txt
+/**/out.txt
