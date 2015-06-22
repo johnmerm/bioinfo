@@ -19,14 +19,14 @@ def hier_clustering(Data,n):
         permuts = itertools.permutations(Clusters.keys(),2)
         closest = min(permuts,key = lambda x:dist(Clusters[x[0]],Clusters[x[1]],Data))
         Clusters[gen] = Clusters[closest[0]]+Clusters[closest[1]]
-        T[gen] = [closest[1],closest[1]]
+        T[gen] = [closest[0],closest[1]]
         all_Clusters[gen] = Clusters[closest[0]]+Clusters[closest[1]]
         print ' '.join([str(c+1) for c in Clusters[closest[0]]])+" "+' '.join([str(c+1) for c in Clusters[closest[1]]])
         del Clusters[closest[0]]
         del Clusters[closest[1]]
         gen = gen+1
     return T,all_Clusters
-    return 
+    
 def test_hier_clustering():
     n=7
     Data = [[0.00, 0.74, 0.85, 0.54, 0.83, 0.92, 0.89],
